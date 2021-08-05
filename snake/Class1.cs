@@ -85,9 +85,17 @@ namespace snake
             this.head_x = GameWidth / 2;
             this.head_y = GameHeight / 2;
             this.dir = direction.UP;
-            this.length = 2;
+            this.length = 8;
             this.history.Add(direction.UP);
             this.history.Add(direction.UP);
+            this.history.Add(direction.UP);
+            this.history.Add(direction.UP); 
+            this.history.Add(direction.UP);
+            this.history.Add(direction.UP);
+            this.history.Add(direction.UP);
+            this.history.Add(direction.UP);
+
+
 
 
         }
@@ -121,9 +129,11 @@ namespace snake
             int start_x = this.head_x;
             int start_y = this.head_y;
 
-            g.FillRectangle(b, this.head_x, this.head_y, this.size, this.size);
+            
             foreach (direction d in history)
             {
+                g.FillRectangle(b, start_x, start_y, this.size, this.size);
+
                 switch (d)
                 {
                     case direction.UP:
@@ -142,8 +152,6 @@ namespace snake
                         start_x -= (size + padding);
                         break;
                 }
-
-                g.FillRectangle(b, start_x, start_y, this.size, this.size);
             }
                 
         }
@@ -176,24 +184,32 @@ namespace snake
         {
             this.head_x += (40 + padding);
             this.dir = direction.RIGHT;
+            this.history.Insert(0, direction.RIGHT);
+            this.history.RemoveAt(this.history.Count - 1);
         }
 
         private void MoveLeft()
         {
             this.head_x -= (40 + padding);
             this.dir = direction.LEFT;
+            this.history.Insert(0, direction.LEFT);
+            this.history.RemoveAt(this.history.Count - 1);
         }
 
         private void MoveUp()
         {
             this.head_y -= (40 + padding);
             this.dir = direction.UP;
+            this.history.Insert(0, direction.UP);
+            this.history.RemoveAt(this.history.Count - 1);
         }
 
         private void MoveDown()
         {
             this.head_y += (40 + padding);
             this.dir = direction.DOWN;
+            this.history.Insert(0, direction.DOWN);
+            this.history.RemoveAt(this.history.Count - 1);
         }
 
         
