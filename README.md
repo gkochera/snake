@@ -15,6 +15,6 @@ The arrow keys control the snake around the board. The `Q` key can be used to qu
 # Outstanding Issues With the Game
 
 - The snake can still leave the board (off-screen).
-- The snake can cross over itself.
-- No score is displayed to the user on the screen.
+- Score bar works but needs to look more refined
+- Need the ability to start another game.
 
