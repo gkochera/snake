@@ -1,6 +1,6 @@
 ﻿# Snake
 
-!(Example of Gameplay)[./example.gif]
+![Example of Gameplay](./snake/example.gif)
 
 This is a small project that I am constantly working on to get familiar with C#. It's a small clone of the classic arcade game **Snake**.
 
