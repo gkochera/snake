@@ -4,19 +4,41 @@ using System.Drawing;
 using System.Timers;
 using System.Collections.Generic;
 
+public enum direction
+{
+    UP = 0,
+    DOWN = 1,
+    LEFT = 2,
+    RIGHT = 3
+};
+
+
+
 namespace snake
 {
 
     class Game: Form
     {
-        public static int width = 1200;
-        public static int height = 800;
-        private Font fnt = new Font("Arial", 10);
-        PictureBox p = new PictureBox();
+        public const int SCREEN_WIDTH = 20;
+        public const int SCREEN_HEIGHT = 20;
+        public const int SIZE = 50;
+        public const int OFFSET = SIZE / 2;
 
 
-        private void Tick(object sender, EventArgs e)
+
+        Food f = new Food();
+        Snake s = new Snake(SCREEN_WIDTH, SCREEN_HEIGHT);
+        Random r = new Random();
+        public int score = 0;
+
+
+        public void GameTimer(object sender, EventArgs e)
         {
+            if (s.head_x == f.x && s.head_y == f.y)
+            {
+                Eat();
+            }
+
             this.Invalidate();
             
         }
@@ -27,28 +49,30 @@ namespace snake
             System.Timers.Timer t = new System.Timers.Timer(10);
             t.Enabled = true;
             t.AutoReset = true;
-            t.Elapsed += new ElapsedEventHandler(Tick);
+            t.Elapsed += new ElapsedEventHandler(GameTimer);
 
             // Set the size and color the window
-            this.Size = new Size(width, height);
+            this.Size = new Size((SCREEN_WIDTH + 1) * SIZE, (SCREEN_HEIGHT + 1) * SIZE);
             this.BackColor = Color.Black;
 
-            // Add the picture box
-            
-            p.BackColor = Color.Black;
-            p.Dock = DockStyle.Fill;
-
-            Snake s = new Snake(width, height);
+            // Draw the snake
             this.Paint += new PaintEventHandler(s.Draw);
 
-            Food f = new Food();
+            // Draw the food
             this.Paint += new PaintEventHandler(f.Draw);
-
-            
 
             // Add the key press event handler
             this.KeyDown += new KeyEventHandler(s.Move);
+        }
 
+        public void Eat()
+        {
+            score++;
+            s.length++;
+            s.history.Add(s.dir);
+            f.x = r.Next(0, SCREEN_WIDTH) * SIZE;
+            f.y = r.Next(0, SCREEN_HEIGHT) * SIZE;
+            
         }
 
 
@@ -60,45 +84,34 @@ namespace snake
 
     class Snake
     {
-        public int box_x, box_y, head_x, head_y, length, size;
-        
+        public int head_x {get; set;}
+        public int head_y { get; set; }
+        public int length { get; set; }
+        public const int SIZE = 50;
+        public List<direction> history { get; set; }
         public direction dir;
-        public int padding = 3;
-        public enum direction  {
-            UP = 0,
-            DOWN = 1,
-            LEFT = 2,
-            RIGHT = 3
-        };
-        public List<direction> history = new List<direction>();
 
 
     public Snake(int GameWidth, int GameHeight)
         {
+
             // Timer
-            System.Timers.Timer advanceTimer = new System.Timers.Timer(500);
+            System.Timers.Timer advanceTimer = new System.Timers.Timer(100);
             advanceTimer.Enabled = true;
             advanceTimer.AutoReset = true;
             advanceTimer.Elapsed += new ElapsedEventHandler(Advance);
 
-            this.size = 40;
-            this.head_x = GameWidth / 2;
-            this.head_y = GameHeight / 2;
+            this.head_x = 100;
+            this.head_y = 400;
             this.dir = direction.UP;
-            this.length = 8;
-            this.history.Add(direction.UP);
-            this.history.Add(direction.UP);
-            this.history.Add(direction.UP);
-            this.history.Add(direction.UP); 
-            this.history.Add(direction.UP);
-            this.history.Add(direction.UP);
-            this.history.Add(direction.UP);
-            this.history.Add(direction.UP);
+            this.length = 1;
+            this.history = new List<direction>(1) { direction.UP };
 
 
 
 
-        }
+
+    }
 
         public void Advance(object sender, ElapsedEventArgs e)
         {
@@ -132,24 +145,24 @@ namespace snake
             
             foreach (direction d in history)
             {
-                g.FillRectangle(b, start_x, start_y, this.size, this.size);
+                g.FillRectangle(b, start_x, start_y, SIZE, SIZE);
 
                 switch (d)
                 {
                     case direction.UP:
-                        start_y += (size + padding);
+                        start_y += (SIZE);
                         break;
 
                     case direction.DOWN:
-                        start_y -= (size + padding);
+                        start_y -= (SIZE);
                         break;
 
                     case direction.LEFT:
-                        start_x += (size + padding);
+                        start_x += (SIZE);
                         break;
 
                     case direction.RIGHT:
-                        start_x -= (size + padding);
+                        start_x -= (SIZE);
                         break;
                 }
             }
@@ -182,7 +195,7 @@ namespace snake
 
         private void MoveRight()
         {
-            this.head_x += (40 + padding);
+            this.head_x += (SIZE);
             this.dir = direction.RIGHT;
             this.history.Insert(0, direction.RIGHT);
             this.history.RemoveAt(this.history.Count - 1);
@@ -190,7 +203,7 @@ namespace snake
 
         private void MoveLeft()
         {
-            this.head_x -= (40 + padding);
+            this.head_x -= (SIZE);
             this.dir = direction.LEFT;
             this.history.Insert(0, direction.LEFT);
             this.history.RemoveAt(this.history.Count - 1);
@@ -198,7 +211,7 @@ namespace snake
 
         private void MoveUp()
         {
-            this.head_y -= (40 + padding);
+            this.head_y -= (SIZE);
             this.dir = direction.UP;
             this.history.Insert(0, direction.UP);
             this.history.RemoveAt(this.history.Count - 1);
@@ -206,7 +219,7 @@ namespace snake
 
         private void MoveDown()
         {
-            this.head_y += (40 + padding);
+            this.head_y += (SIZE);
             this.dir = direction.DOWN;
             this.history.Insert(0, direction.DOWN);
             this.history.RemoveAt(this.history.Count - 1);
@@ -218,19 +231,21 @@ namespace snake
 
 class Food
 {
-    int x, y, size;
+    public int x { get; set; }
+    public int y { get; set; }
+    public const int SIZE = 50;
+
     public Food()
     {
-        this.x = 50;
-        this.y = 500;
-        this.size = 40;
+        this.x = 200;
+        this.y = 400;
     }
 
     public void Draw(object sender, PaintEventArgs e)
     {
         Graphics g = e.Graphics;
         Brush b = new SolidBrush(Color.Red);
-        g.FillRectangle(b, this.x, this.y, this.size, this.size);
+        g.FillRectangle(b, this.x, this.y, SIZE, SIZE);
     }
 
 
