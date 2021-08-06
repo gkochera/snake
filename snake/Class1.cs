@@ -20,7 +20,7 @@ namespace snake
     class Game: Form
     {
         public const int SCREEN_WIDTH = 20;
-        public const int SCREEN_HEIGHT = 20;
+        public const int SCREEN_HEIGHT = 15;
         public const int SIZE = 50;
         public const int OFFSET = SIZE / 2;
         public const int SCOREBAR_HEIGHT = 100;
@@ -33,19 +33,25 @@ namespace snake
         PictureBox scoreField = new PictureBox();
         Label scoreTitle = new Label();
         Label scoreValue = new Label();
+        Label gameOver = new Label();
         Random r = new Random();
-        System.Timers.Timer t = new System.Timers.Timer(100);
+        bool gameActive = true;
+        System.Timers.Timer t = new System.Timers.Timer(50);
 
         public int score;
 
 
         public void GameTimer(object sender, EventArgs e)
         {
+
+            // Determine if the snake's head is over food.
             if (s.head_x == f.x && s.head_y == f.y)
             {
                 Eat();
             }
 
+            // Get the snakes current direction, increment its location, save the
+            // tail history and remove the last node in the tail.
             switch (s.dir)
             {
                 case direction.UP:
@@ -64,8 +70,28 @@ namespace snake
                     s.MoveLeft();
                     break;
             }
+
+            s.history.Insert(0, (s.head_x, s.head_y));
+            s.history.RemoveAt(s.history.Count - 1);
+
+            // Determine if the snake ran into itself
+            for (int i = 1; i < s.history.Count; i++)
+            {
+                if (s.head_x == s.history[i].Item1 && s.head_y == s.history[i].Item2)
+                {
+                    this.gameActive = false;
+                }
+            }
+
+
+            // Refresh the play area
             p.Invalidate();
             scoreField.Invalidate();
+
+            if (!this.gameActive)
+            {
+                t.Stop();
+            }
             
         }
 
@@ -100,6 +126,19 @@ namespace snake
             scoreValue.Parent = scoreField;
             scoreValue.Font = new Font(FontFamily.GenericSansSerif, 16);
 
+            // Configure the Game Over screen
+            Size szGameOver = new Size(300, 100);
+            gameOver.Text = "Game Over!";
+            gameOver.Size = szGameOver;
+            gameOver.Location = new Point(((SCREEN_WIDTH * SIZE) / 2) - 60, ((SCREEN_HEIGHT * SIZE) / 2) - 20);
+            gameOver.ForeColor = Color.White;
+            gameOver.BackColor = Color.Transparent;
+            gameOver.Parent = p;
+            gameOver.Font = new Font(FontFamily.GenericSansSerif, 34);
+            gameOver.Visible = false;
+
+
+
             // Set the size and color the window
             this.Size = new Size((SCREEN_WIDTH + 1) * SIZE, (SCREEN_HEIGHT + 1) * SIZE + SCOREBAR_HEIGHT);
             this.BackColor = Color.White;
@@ -115,6 +154,9 @@ namespace snake
             // Draw the snake
             p.Paint += new PaintEventHandler(s.Draw);
 
+            // Prepare the Game Over Text
+            p.Paint += new PaintEventHandler(Die);
+
             // Draw the score
             scoreField.Paint += new PaintEventHandler(this.UpdateScore);
 
@@ -127,7 +169,7 @@ namespace snake
         {
             this.score++;
             s.length++;
-            s.history.Add(s.dir);
+            s.history.Add((s.head_x, s.head_y));
             f.x = r.Next(0, SCREEN_WIDTH) * SIZE;
             f.y = r.Next(0, SCREEN_HEIGHT) * SIZE;
             
@@ -146,6 +188,14 @@ namespace snake
             scoreValue.Text = this.score.ToString();
         }
 
+        public void Die(object sender, PaintEventArgs e)
+        {
+            if (!gameActive)
+            {
+                gameOver.Visible = true;
+            }
+        }
+
 
         public static void Main()
         {
@@ -159,7 +209,7 @@ namespace snake
         public int head_y { get; set; }
         public int length { get; set; }
         public const int SIZE = 50;
-        public List<direction> history { get; set; }
+        public List<(int, int)> history { get; set; }
         public direction dir;
 
 
@@ -169,7 +219,7 @@ namespace snake
             this.head_y = 400;
             this.dir = direction.UP;
             this.length = 1;
-            this.history = new List<direction>(1) { direction.UP };
+            this.history = new List<(int, int)>(1) { (this.head_x, this.head_y) };
 
 
 
@@ -185,30 +235,10 @@ namespace snake
             int start_y = this.head_y;
 
             
-            foreach (direction d in history)
+            foreach ((int, int) d in history)
             {
-                g.FillRectangle(b, start_x, start_y, SIZE, SIZE);
-
-                switch (d)
-                {
-                    case direction.UP:
-                        start_y += (SIZE);
-                        break;
-
-                    case direction.DOWN:
-                        start_y -= (SIZE);
-                        break;
-
-                    case direction.LEFT:
-                        start_x += (SIZE);
-                        break;
-
-                    case direction.RIGHT:
-                        start_x -= (SIZE);
-                        break;
-                }
+                g.FillRectangle(b, d.Item1, d.Item2, SIZE, SIZE);
             }
-                
         }
 
         public void Move(object sender, KeyEventArgs e)
@@ -240,32 +270,25 @@ namespace snake
         {
             this.head_x += (SIZE);
             this.dir = direction.RIGHT;
-            this.history.Insert(0, direction.RIGHT);
-            this.history.RemoveAt(this.history.Count - 1);
+
         }
 
         public void MoveLeft()
         {
             this.head_x -= (SIZE);
             this.dir = direction.LEFT;
-            this.history.Insert(0, direction.LEFT);
-            this.history.RemoveAt(this.history.Count - 1);
         }
 
         public void MoveUp()
         {
             this.head_y -= (SIZE);
             this.dir = direction.UP;
-            this.history.Insert(0, direction.UP);
-            this.history.RemoveAt(this.history.Count - 1);
         }
 
         public void MoveDown()
         {
             this.head_y += (SIZE);
             this.dir = direction.DOWN;
-            this.history.Insert(0, direction.DOWN);
-            this.history.RemoveAt(this.history.Count - 1);
         }
 
         
