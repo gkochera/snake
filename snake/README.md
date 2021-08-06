@@ -12,3 +12,9 @@ Clone the repository to your local machine and open the Visual Studio project fi
 
 The arrow keys control the snake around the board. The `Q` key can be used to quit the game and the `P` key can be used to pause the game.
 
+# Outstanding Issues With the Game
+
+- The snake can still leave the board (off-screen).
+- The snake can cross over itself.
+- No score is displayed to the user on the screen.
+
