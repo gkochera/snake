@@ -14,29 +14,27 @@ public enum direction
 
 
 
+
 namespace snake
 {
-
-    class Game: Form
+    class Game : Form
     {
         public const int SCREEN_WIDTH = 20;
         public const int SCREEN_HEIGHT = 15;
         public const int SIZE = 50;
-        public const int OFFSET = SIZE / 2;
         public const int SCOREBAR_HEIGHT = 100;
-
-
+        public const int SPEED = 75;
 
         Food f = new Food();
-        Snake s = new Snake(SCREEN_WIDTH, SCREEN_HEIGHT);
+        Snake s = new Snake();
         PictureBox p = new PictureBox();
         PictureBox scoreField = new PictureBox();
         Label scoreTitle = new Label();
         Label scoreValue = new Label();
         Label gameOver = new Label();
-        Random r = new Random();
+
         bool gameActive = true;
-        System.Timers.Timer t = new System.Timers.Timer(50);
+        System.Timers.Timer t = new System.Timers.Timer(SPEED);
 
         public int score;
 
@@ -88,6 +86,8 @@ namespace snake
             p.Invalidate();
             scoreField.Invalidate();
 
+
+            // If the game is lost, stop all movement on the board.
             if (!this.gameActive)
             {
                 t.Stop();
@@ -112,6 +112,7 @@ namespace snake
             scoreField.Location = new Point(0, 0);
             scoreField.Size = new Size((SCREEN_WIDTH + 1) * SIZE, SCOREBAR_HEIGHT);
 
+            // Set the Score and display the Score label
             this.score = 0;
             scoreTitle.Text = "Score";
             scoreTitle.Location = new Point(30, 30);
@@ -119,7 +120,7 @@ namespace snake
             scoreTitle.Parent = scoreField;
             scoreTitle.Font = new Font(FontFamily.GenericSansSerif, 16);
 
-
+            // Set the score value field below the label
             scoreValue.Text = this.score.ToString();
             scoreValue.Location = new Point(30, 60);
             scoreValue.ForeColor = Color.White;
@@ -161,7 +162,7 @@ namespace snake
             scoreField.Paint += new PaintEventHandler(this.UpdateScore);
 
             // Add the key press event handler
-            this.KeyDown += new KeyEventHandler(s.Move);
+            this.KeyDown += new KeyEventHandler(Input);
             this.KeyDown += new KeyEventHandler(Pause);
         }
 
@@ -170,8 +171,7 @@ namespace snake
             this.score++;
             s.length++;
             s.history.Add((s.head_x, s.head_y));
-            f.x = r.Next(0, SCREEN_WIDTH) * SIZE;
-            f.y = r.Next(0, SCREEN_HEIGHT) * SIZE;
+            f.NextLocation();
             
         }
 
@@ -196,6 +196,51 @@ namespace snake
             }
         }
 
+        public void Input(object sender, KeyEventArgs e)
+        {
+            // Up Arrow
+            if (e.KeyCode == Keys.Up)
+            {
+                s.dir = direction.UP;
+            }
+
+            // Down Arrow
+            else if (e.KeyCode == Keys.Down)
+            {
+                s.dir = direction.DOWN;
+            }
+
+            // Left Arrow
+            else if (e.KeyCode == Keys.Left)
+            {
+                s.dir = direction.LEFT;
+            }
+
+            // Right Arrow
+            else if (e.KeyCode == Keys.Right)
+            {
+                s.dir = direction.RIGHT;
+            }
+
+            // Q key - Quits Game
+            else if (e.KeyCode == Keys.Q)
+            {
+                Application.Exit();
+            }
+
+            // N key - Starts New Game
+            else if (e.KeyCode == Keys.N)
+            {
+                s.Reset();
+                t.Start();
+                gameOver.Visible = false;
+                this.gameActive = true;
+                this.score = 0;
+                f.NextLocation();
+            }
+
+        }
+
 
         public static void Main()
         {
@@ -208,111 +253,97 @@ namespace snake
         public int head_x {get; set;}
         public int head_y { get; set; }
         public int length { get; set; }
-        public const int SIZE = 50;
         public List<(int, int)> history { get; set; }
         public direction dir;
 
 
-        public Snake(int GameWidth, int GameHeight)
+        public Snake()
         {
-            this.head_x = 100;
-            this.head_y = 400;
+            this.head_x = ((Game.SCREEN_WIDTH / 2) * Game.SIZE);
+            this.head_y = ((Game.SCREEN_HEIGHT / 2) * Game.SIZE);
             this.dir = direction.UP;
             this.length = 1;
             this.history = new List<(int, int)>(1) { (this.head_x, this.head_y) };
+        }
 
-
-
-
-
+        public void Reset()
+        {
+            this.head_x = ((Game.SCREEN_WIDTH / 2) * Game.SIZE);
+            this.head_y = ((Game.SCREEN_HEIGHT / 2) * Game.SIZE);
+            this.dir = direction.UP;
+            this.length = 1;
+            this.history = new List<(int, int)>(1) { (this.head_x, this.head_y) };
         }
 
         public void Draw(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             Brush b = new SolidBrush(Color.Lime);
-            int start_x = this.head_x;
-            int start_y = this.head_y;
 
-            
             foreach ((int, int) d in history)
             {
-                g.FillRectangle(b, d.Item1, d.Item2, SIZE, SIZE);
+                g.FillRectangle(b, d.Item1, d.Item2, Game.SIZE, Game.SIZE);
             }
         }
 
-        public void Move(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Up)
-            {
-                this.dir = direction.UP;
-            }
-            else if (e.KeyCode == Keys.Down)
-            {
-                this.dir = direction.DOWN;
-            }
-            else if (e.KeyCode == Keys.Left)
-            {
-                this.dir = direction.LEFT;
-            }
-            else if (e.KeyCode == Keys.Right)
-            {
-                this.dir = direction.RIGHT;
-            }
-            else if (e.KeyCode == Keys.Q)
-            {
-                Application.Exit();
-            }
 
-        }
 
         public void MoveRight()
         {
-            this.head_x += (SIZE);
+            this.head_x += Game.SIZE;
             this.dir = direction.RIGHT;
 
         }
 
         public void MoveLeft()
         {
-            this.head_x -= (SIZE);
+            this.head_x -= Game.SIZE;
             this.dir = direction.LEFT;
         }
 
         public void MoveUp()
         {
-            this.head_y -= (SIZE);
+            this.head_y -= Game.SIZE;
             this.dir = direction.UP;
         }
 
         public void MoveDown()
         {
-            this.head_y += (SIZE);
+            this.head_y += Game.SIZE;
             this.dir = direction.DOWN;
         }
 
         
     }
+
+    class Food
+    {
+        public int x { get; set; }
+        public int y { get; set; }
+
+        public Random r = new Random();
+
+        public Food()
+        {
+            this.x = r.Next(0, Game.SCREEN_WIDTH) * Game.SIZE;
+            this.y = r.Next(0, Game.SCREEN_HEIGHT) * Game.SIZE;
+        }
+
+        public void Draw(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            Brush b = new SolidBrush(Color.Red);
+            g.FillRectangle(b, this.x, this.y, Game.SIZE, Game.SIZE);
+        }
+
+        public void NextLocation()
+        {
+            this.x = r.Next(0, Game.SCREEN_WIDTH) * Game.SIZE;
+            this.y = r.Next(0, Game.SCREEN_HEIGHT) * Game.SIZE;
+        }
+
+
+    }
 }
 
-class Food
-{
-    public int x { get; set; }
-    public int y { get; set; }
-    public const int SIZE = 50;
 
-    public Food()
-    {
-        this.x = 200;
-        this.y = 400;
-    }
-
-    public void Draw(object sender, PaintEventArgs e)
-    {
-        Graphics g = e.Graphics;
-        Brush b = new SolidBrush(Color.Red);
-        g.FillRectangle(b, this.x, this.y, SIZE, SIZE);
-    }
-
-
-}
