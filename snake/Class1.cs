@@ -23,15 +23,20 @@ namespace snake
         public const int SCREEN_HEIGHT = 20;
         public const int SIZE = 50;
         public const int OFFSET = SIZE / 2;
+        public const int SCOREBAR_HEIGHT = 100;
 
 
 
         Food f = new Food();
         Snake s = new Snake(SCREEN_WIDTH, SCREEN_HEIGHT);
+        PictureBox p = new PictureBox();
+        PictureBox scoreField = new PictureBox();
+        Label scoreTitle = new Label();
+        Label scoreValue = new Label();
         Random r = new Random();
         System.Timers.Timer t = new System.Timers.Timer(100);
 
-        public int score = 0;
+        public int score;
 
 
         public void GameTimer(object sender, EventArgs e)
@@ -59,28 +64,59 @@ namespace snake
                     s.MoveLeft();
                     break;
             }
-
-            this.Invalidate();
+            p.Invalidate();
+            scoreField.Invalidate();
             
         }
 
         public Game()
         {
             // Timer
-            
             t.Enabled = true;
             t.AutoReset = true;
             t.Elapsed += new ElapsedEventHandler(GameTimer);
 
+            // Configure the PictureBox (Game Field)
+            p.BackColor = Color.Black;
+            p.Location = new Point(0, SCOREBAR_HEIGHT);
+            p.Size = new Size((SCREEN_WIDTH + 1) * SIZE, (SCREEN_HEIGHT + 1) * SIZE);
+
+            // Configure the Score Area
+            scoreField.BackColor = Color.DarkGray;
+            scoreField.Location = new Point(0, 0);
+            scoreField.Size = new Size((SCREEN_WIDTH + 1) * SIZE, SCOREBAR_HEIGHT);
+
+            this.score = 0;
+            scoreTitle.Text = "Score";
+            scoreTitle.Location = new Point(30, 30);
+            scoreTitle.ForeColor = Color.White;
+            scoreTitle.Parent = scoreField;
+            scoreTitle.Font = new Font(FontFamily.GenericSansSerif, 16);
+
+
+            scoreValue.Text = this.score.ToString();
+            scoreValue.Location = new Point(30, 60);
+            scoreValue.ForeColor = Color.White;
+            scoreValue.Parent = scoreField;
+            scoreValue.Font = new Font(FontFamily.GenericSansSerif, 16);
+
             // Set the size and color the window
-            this.Size = new Size((SCREEN_WIDTH + 1) * SIZE, (SCREEN_HEIGHT + 1) * SIZE);
-            this.BackColor = Color.Black;
+            this.Size = new Size((SCREEN_WIDTH + 1) * SIZE, (SCREEN_HEIGHT + 1) * SIZE + SCOREBAR_HEIGHT);
+            this.BackColor = Color.White;
+
+            // Draw the board
+            Controls.Add(p);
+            Controls.Add(scoreField);
+            
 
             // Draw the food
-            this.Paint += new PaintEventHandler(f.Draw);
+            p.Paint += new PaintEventHandler(f.Draw);
 
             // Draw the snake
-            this.Paint += new PaintEventHandler(s.Draw);
+            p.Paint += new PaintEventHandler(s.Draw);
+
+            // Draw the score
+            scoreField.Paint += new PaintEventHandler(this.UpdateScore);
 
             // Add the key press event handler
             this.KeyDown += new KeyEventHandler(s.Move);
@@ -89,7 +125,7 @@ namespace snake
 
         public void Eat()
         {
-            score++;
+            this.score++;
             s.length++;
             s.history.Add(s.dir);
             f.x = r.Next(0, SCREEN_WIDTH) * SIZE;
@@ -103,6 +139,11 @@ namespace snake
             {
                 t.Enabled = !t.Enabled;
             }
+        }
+
+        public void UpdateScore(object sender, PaintEventArgs e)
+        {
+            scoreValue.Text = this.score.ToString();
         }
 
 
