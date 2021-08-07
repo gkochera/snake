@@ -147,6 +147,9 @@ namespace snake
             // Draw the board
             Controls.Add(p);
             Controls.Add(scoreField);
+
+            // Set the title
+            this.Text = "Snake - By: George Kochera";
             
 
             // Draw the food
@@ -245,6 +248,7 @@ namespace snake
         public static void Main()
         {
             Application.Run(new Game());
+            
         }
     }
 

@@ -19,5 +19,5 @@ The arrow keys control the snake around the board.
 # Outstanding Issues With the Game
 
 - Score bar works but needs to look more refined
-
+- Food can sometimes generate under snake body
 
