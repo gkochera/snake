@@ -199,25 +199,25 @@ namespace snake
         public void Input(object sender, KeyEventArgs e)
         {
             // Up Arrow
-            if (e.KeyCode == Keys.Up)
+            if (e.KeyCode == Keys.Up && s.dir != direction.DOWN)
             {
                 s.dir = direction.UP;
             }
 
             // Down Arrow
-            else if (e.KeyCode == Keys.Down)
+            else if (e.KeyCode == Keys.Down && s.dir != direction.UP)
             {
                 s.dir = direction.DOWN;
             }
 
             // Left Arrow
-            else if (e.KeyCode == Keys.Left)
+            else if (e.KeyCode == Keys.Left && s.dir != direction.RIGHT)
             {
                 s.dir = direction.LEFT;
             }
 
             // Right Arrow
-            else if (e.KeyCode == Keys.Right)
+            else if (e.KeyCode == Keys.Right && s.dir != direction.LEFT)
             {
                 s.dir = direction.RIGHT;
             }
@@ -291,6 +291,10 @@ namespace snake
         public void MoveRight()
         {
             this.head_x += Game.SIZE;
+            if (this.head_x >= Game.SCREEN_WIDTH * Game.SIZE)
+            {
+                this.head_x = 0;
+            }
             this.dir = direction.RIGHT;
 
         }
@@ -298,18 +302,31 @@ namespace snake
         public void MoveLeft()
         {
             this.head_x -= Game.SIZE;
+            if (this.head_x < 0)
+            {
+                this.head_x = Game.SCREEN_WIDTH * Game.SIZE;
+            }
             this.dir = direction.LEFT;
         }
 
         public void MoveUp()
         {
             this.head_y -= Game.SIZE;
+            if (this.head_y < 0)
+            {
+                this.head_y = Game.SCREEN_HEIGHT * Game.SIZE;
+            }
             this.dir = direction.UP;
         }
 
         public void MoveDown()
         {
             this.head_y += Game.SIZE;
+            if (this.head_y >= Game.SCREEN_HEIGHT * Game.SIZE)
+            {
+                this.head_y = 0;
+            }
+
             this.dir = direction.DOWN;
         }
 
