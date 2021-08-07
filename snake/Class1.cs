@@ -103,39 +103,42 @@ namespace snake
             t.Elapsed += new ElapsedEventHandler(GameTimer);
 
             // Configure the PictureBox (Game Field)
-            p.BackColor = Color.Black;
+            p.BackColor = Color.Black;  
             p.Location = new Point(0, SCOREBAR_HEIGHT);
             p.Size = new Size((SCREEN_WIDTH + 1) * SIZE, (SCREEN_HEIGHT + 1) * SIZE);
 
             // Configure the Score Area
-            scoreField.BackColor = Color.DarkGray;
+            scoreField.BackColor = Color.FromArgb(0, 25, 35);
             scoreField.Location = new Point(0, 0);
             scoreField.Size = new Size((SCREEN_WIDTH + 1) * SIZE, SCOREBAR_HEIGHT);
 
             // Set the Score and display the Score label
             this.score = 0;
-            scoreTitle.Text = "Score";
-            scoreTitle.Location = new Point(30, 30);
+            scoreTitle.Text = "SCORE";
+            scoreTitle.Location = new Point(10, 10);
+            scoreTitle.Size = new Size(200, 45);
             scoreTitle.ForeColor = Color.White;
             scoreTitle.Parent = scoreField;
-            scoreTitle.Font = new Font(FontFamily.GenericSansSerif, 16);
+            scoreTitle.Font = new Font("Consolas", 34);
 
             // Set the score value field below the label
             scoreValue.Text = this.score.ToString();
-            scoreValue.Location = new Point(30, 60);
-            scoreValue.ForeColor = Color.White;
+            scoreValue.Location = new Point(15, 60);
+            scoreValue.Size = new Size(200, 30);
+            scoreValue.ForeColor = Color.White; 
             scoreValue.Parent = scoreField;
-            scoreValue.Font = new Font(FontFamily.GenericSansSerif, 16);
+            scoreValue.Font = new Font("Consolas", 24);
 
             // Configure the Game Over screen
-            Size szGameOver = new Size(300, 100);
-            gameOver.Text = "Game Over!";
+            Size szGameOver = new Size(300, 300);
+            gameOver.Text = "GAME\nOVER";
+            gameOver.TextAlign = ContentAlignment.MiddleCenter;
             gameOver.Size = szGameOver;
-            gameOver.Location = new Point(((SCREEN_WIDTH * SIZE) / 2) - 60, ((SCREEN_HEIGHT * SIZE) / 2) - 20);
+            gameOver.Location = new Point(((SCREEN_WIDTH * SIZE) / 2) - 150, ((SCREEN_HEIGHT * SIZE) / 2) - 150);
             gameOver.ForeColor = Color.White;
             gameOver.BackColor = Color.Transparent;
             gameOver.Parent = p;
-            gameOver.Font = new Font(FontFamily.GenericSansSerif, 34);
+            gameOver.Font = new Font("Consolas", 58, FontStyle.Bold);
             gameOver.Visible = false;
 
 
@@ -282,11 +285,20 @@ namespace snake
         public void Draw(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            Brush b = new SolidBrush(Color.Lime);
+            int green = 255;
+            Color c = Color.FromArgb(0, green, 0);
+            Brush b = new SolidBrush(c);
 
             foreach ((int, int) d in history)
             {
                 g.FillRectangle(b, d.Item1, d.Item2, Game.SIZE, Game.SIZE);
+                green -= 10;
+                if (green < 20)
+                {
+                    green = 20;
+                }
+                c = Color.FromArgb(0, green, 0);
+                b = new SolidBrush(c);
             }
         }
 
@@ -354,7 +366,8 @@ namespace snake
         {
             Graphics g = e.Graphics;
             Brush b = new SolidBrush(Color.Red);
-            g.FillRectangle(b, this.x, this.y, Game.SIZE, Game.SIZE);
+            Rectangle rect = new Rectangle(this.x, this.y, Game.SIZE, Game.SIZE);
+            g.FillEllipse(b, rect);
         }
 
         public void NextLocation()
